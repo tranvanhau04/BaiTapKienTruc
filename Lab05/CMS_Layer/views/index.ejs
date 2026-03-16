@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hệ thống CMS Phân Lớp</title>
+    <style>
+        body { font-family: Arial; max-width: 800px; margin: auto; padding: 20px; }
+        .post-card { border: 1px solid #ccc; padding: 15px; margin-bottom: 10px; border-radius: 5px; }
+        input, textarea, button { display: block; width: 100%; margin-bottom: 10px; padding: 8px; }
+    </style>
+</head>
+<body>
+    <h1>📝 Đăng bài viết mới</h1>
+    
+    <form action="/add-post" method="POST">
+        <input type="text" name="title" placeholder="Nhập tiêu đề bài viết..." required />
+        <textarea name="content" placeholder="Nội dung bài viết..." rows="4"></textarea>
+        <button type="submit">Đăng bài lên CMS</button>
+    </form>
+
+    <hr>
+    <h2>📚 Quản lý Nội dung (Đã lưu trong MySQL)</h2>
+    <div>
+        <% if (posts.length === 0) { %>
+            <p>Chưa có bài viết nào.</p>
+        <% } %>
+
+        <% posts.forEach(function(post) { %>
+            <div class="post-card">
+                <h3 style="margin:0;"><%= post.title %></h3>
+                <p><%= post.content %></p>
+                <small style="color: green;">🏷️ Thẻ SEO: <%= post.seoTitle %></small>
+            </div>
+        <% }); %>
+    </div>
+</body>
+</html>

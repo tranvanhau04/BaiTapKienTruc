@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  cms_db:
+    image: mysql:8.0
+    container_name: my_cms_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: cms_database
+      MYSQL_USER: cms_user
+      MYSQL_PASSWORD: secretpassword
+    ports:
+      - "3306:3306"

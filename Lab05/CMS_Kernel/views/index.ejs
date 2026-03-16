@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head><title>CMS Microkernel</title></head>
+<body style="font-family: Arial; padding: 20px;">
+    <h1>Hệ thống CMS Microkernel</h1>
+    <form action="/add-post" method="POST" style="margin-bottom: 20px;">
+        <input type="text" name="title" placeholder="Tiêu đề..." required style="display:block; margin-bottom:10px; padding:5px; width:300px;">
+        <textarea name="content" placeholder="Nội dung..." required style="display:block; margin-bottom:10px; padding:5px; width:300px; height:80px;"></textarea>
+        <button type="submit">Đăng Bài</button>
+    </form>
+    <hr>
+    <h2>Danh sách bài viết</h2>
+    <ul>
+        <% posts.forEach(post => { %>
+            <li>
+                <strong><%= post.title %></strong>
+                <p><%= post.content %></p>
+                <i style="color: blue;"><%= post.seoTags %></i>
+            </li>
+        <% }) %>
+    </ul>
+</body>
+</html>
