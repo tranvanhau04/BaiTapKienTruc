@@ -1,0 +1,1 @@
+console.log("Ứng dụng đã chạy thành công trong môi trường tối ưu!");
