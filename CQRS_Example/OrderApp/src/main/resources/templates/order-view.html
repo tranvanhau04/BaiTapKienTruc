@@ -1,0 +1,30 @@
+<body class="container mt-4">
+<h2 class="text-danger">Order System (CQRS + Event)</h2>
+
+<div class="card p-3 mb-4 shadow-sm">
+    <form th:action="@{/orders/create}" method="post" class="row g-3">
+        <div class="col-md-6"><input type="text" name="product" class="form-control" placeholder="Tên sản phẩm" required></div>
+        <div class="col-md-3"><input type="number" name="quantity" class="form-control" value="1"></div>
+        <div class="col-md-3"><button type="submit" class="btn btn-primary w-100">Đặt hàng</button></div>
+    </form>
+</div>
+
+<table class="table table-hover border">
+    <thead class="table-dark">
+    <tr><th>ID</th><th>Sản phẩm</th><th>Số lượng</th><th>Trạng thái</th><th>Hành động</th></tr>
+    </thead>
+    <tbody>
+    <tr th:each="o : ${orders}">
+        <td th:text="${o.id}"></td>
+        <td th:text="${o.productName}"></td>
+        <td th:text="${o.quantity}"></td>
+        <td><span class="badge" th:classappend="${o.status == 'CREATED' ? 'bg-success' : 'bg-secondary'}" th:text="${o.status}"></span></td>
+        <td>
+            <form th:if="${o.status == 'CREATED'}" th:action="@{/orders/cancel/{id}(id=${o.id})}" method="post">
+                <button class="btn btn-sm btn-outline-danger">Hủy đơn</button>
+            </form>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>

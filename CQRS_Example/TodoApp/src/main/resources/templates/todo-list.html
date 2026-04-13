@@ -1,0 +1,26 @@
+<body class="container mt-5">
+<h2>My Todo App</h2>
+
+<form th:action="@{/todos/add}" method="post" class="mb-4 d-flex">
+    <input type="text" name="task" class="form-control me-2" placeholder="Việc cần làm..." required>
+    <button type="submit" class="btn btn-primary text-nowrap">Thêm</button>
+</form>
+
+<table class="table border">
+    <tr th:each="todo : ${todos}">
+        <td th:text="${todo.task}" th:style="${todo.completed ? 'text-decoration: line-through' : ''}"></td>
+        <td>
+            <form th:action="@{/todos/toggle/{id}(id=${todo.id})}" method="post">
+                <input type="hidden" name="status" th:value="${!todo.completed}">
+                <button type="submit" class="btn btn-sm" th:classappend="${todo.completed ? 'btn-secondary' : 'btn-success'}"
+                        th:text="${todo.completed ? 'Làm lại' : 'Xong'}"></button>
+            </form>
+        </td>
+        <td>
+            <form th:action="@{/todos/delete/{id}(id=${todo.id})}" method="post">
+                <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+            </form>
+        </td>
+    </tr>
+</table>
+</body>

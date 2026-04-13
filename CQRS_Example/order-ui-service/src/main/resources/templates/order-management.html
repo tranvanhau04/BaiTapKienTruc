@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management System - CQRS Architecture</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .architecture-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .service-status {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .service-status h3 {
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .service-status p {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+        }
+
+        .section h2 span {
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-right: 10px;
+            font-size: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-danger {
+            background: #f56565;
+            color: white;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-danger:hover {
+            background: #e53e3e;
+        }
+
+        .orders-list {
+            margin-top: 20px;
+        }
+
+        .order-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .order-info {
+            flex: 1;
+        }
+
+        .order-info h4 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .order-info p {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 3px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #ffd700;
+            color: #333;
+        }
+
+        .status-completed {
+            background: #90ee90;
+            color: #333;
+        }
+
+        .status-cancelled {
+            background: #ffb6c1;
+            color: #333;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .alert-error {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 1px solid #fc8181;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 15px;
+            height: 15px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .architecture-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- Header -->
+    <div class="header">
+        <h1>📦 Order Management System</h1>
+        <p>CQRS Architecture with Microservices Pattern</p>
+
+        <div class="architecture-info">
+            <div class="service-status">
+                <h3>Command Service</h3>
+                <p><strong>Port:</strong> 8081</p>
+                <p><strong>DB:</strong> Write Model (H2)</p>
+                <p><strong>Role:</strong> Create & Cancel Orders</p>
+            </div>
+            <div class="service-status">
+                <h3>Query Service</h3>
+                <p><strong>Port:</strong> 8082</p>
+                <p><strong>DB:</strong> Read Model (H2)</p>
+                <p><strong>Role:</strong> Query Orders</p>
+            </div>
+            <div class="service-status">
+                <h3>Event Bus</h3>
+                <p><strong>Type:</strong> SimulatedEventBus</p>
+                <p><strong>Pattern:</strong> Event-Driven</p>
+                <p><strong>Consistency:</strong> Eventual</p>
+            </div>
+            <div class="service-status">
+                <h3>UI Service</h3>
+                <p><strong>Port:</strong> 8080</p>
+                <p><strong>Framework:</strong> Thymeleaf</p>
+                <p><strong>Role:</strong> Frontend Integration</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Command Section -->
+        <div class="section">
+            <h2><span>COMMAND</span> Create & Manage Orders</h2>
+
+            <div id="commandAlert"></div>
+
+            <form id="createOrderForm">
+                <div class="form-group">
+                    <label for="product">Product Name</label>
+                    <input type="text" id="product" name="product" placeholder="e.g., Laptop, iPhone" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="quantity">Quantity</label>
+                    <input type="number" id="quantity" name="quantity" placeholder="e.g., 5" min="1" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Create Order</button>
+            </form>
+
+            <div class="form-group" style="margin-top: 25px;">
+                <label for="cancelReason" style="margin-top: 20px;">Cancel Order by ID</label>
+                <input type="number" id="cancelOrderId" placeholder="Enter Order ID" min="1">
+                <input type="text" id="cancelReason" placeholder="Cancellation reason" style="margin-top: 10px;">
+                <button onclick="cancelOrder()" class="btn btn-primary" style="margin-top: 10px;">Cancel Order</button>
+            </div>
+        </div>
+
+        <!-- Query Section -->
+        <div class="section">
+            <h2><span>QUERY</span> View All Orders</h2>
+
+            <button onclick="refreshOrders()" class="btn btn-primary" style="margin-bottom: 15px;">Refresh List</button>
+
+            <div id="ordersContainer">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading orders...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const COMMAND_API = 'http://localhost:8081/api/orders';
+    const QUERY_API = 'http://localhost:8082/api/orders';
+    const UI_API = '/api/orders';
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', function() {
+        refreshOrders();
+
+        document.getElementById('createOrderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            createOrder();
+        });
+    });
+
+    // Create Order via Command Service
+    async function createOrder() {
+        const product = document.getElementById('product').value;
+        const quantity = parseInt(document.getElementById('quantity').value);
+
+        if (!product || !quantity) {
+            showAlert('commandAlert', 'Please fill all fields', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(UI_API + '/create?product=' + encodeURIComponent(product) + '&quantity=' + quantity, {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                showAlert('commandAlert', 'Order created successfully! ID: ' + data.id, 'success');
+                document.getElementById('createOrderForm').reset();
+
+                // Refresh orders after a delay
+                setTimeout(refreshOrders, 500);
+            } else {
+                showAlert('commandAlert', 'Failed to create order', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('commandAlert', 'Error creating order: ' + error.message, 'error');
+        }
+    }
+
+    // Cancel Order via Command Service
+    async function cancelOrder() {
+        const orderId = document.getElementById('cancelOrderId').value;
+        const reason = document.getElementById('cancelReason').value;
+
+        if (!orderId || !reason) {
+            showAlert('commandAlert', 'Please fill Order ID and reason', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(UI_API + '/' + orderId + '/cancel?reason=' + encodeURIComponent(reason), {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                showAlert('commandAlert', 'Order cancelled successfully!', 'success');
+                document.getElementById('cancelOrderId').value = '';
+                document.getElementById('cancelReason').value = '';
+
+                // Refresh orders after a delay
+                setTimeout(refreshOrders, 500);
+            } else {
+                showAlert('commandAlert', 'Failed to cancel order', 'error');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showAlert('commandAlert', 'Error cancelling order: ' + error.message, 'error');
+        }
+    }
+
+    // Refresh orders from Query Service
+    async function refreshOrders() {
+        try {
+            const response = await fetch(UI_API + '/list');
+            const orders = await response.json();
+
+            const container = document.getElementById('ordersContainer');
+
+            if (orders.length === 0) {
+                container.innerHTML = '<div class="empty-state"><p>No orders found. Create one to get started!</p></div>';
+            } else {
+                let html = '<div class="orders-list">';
+                orders.forEach(order => {
+                    html += `
+                        <div class="order-item">
+                            <div class="order-info">
+                                <h4>Order #${order.id} - ${order.product}</h4>
+                                <p><strong>Quantity:</strong> ${order.quantity}</p>
+                                <p><strong>Status:</strong> <span class="status-badge status-${order.status.toLowerCase()}">${order.status}</span></p>
+                                <p><strong>Created:</strong> ${formatDate(order.createdAt)}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            }
+        } catch (error) {
+            console.error('Error fetching orders:', error);
+            document.getElementById('ordersContainer').innerHTML = '<div class="alert alert-error">Error loading orders: ' + error.message + '</div>';
+        }
+    }
+
+    // Show alert message
+    function showAlert(elementId, message, type) {
+        const alertDiv = document.getElementById(elementId);
+        alertDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+        setTimeout(() => {
+            alertDiv.innerHTML = '';
+        }, 5000);
+    }
+
+    // Format date
+    function formatDate(dateString) {
+        const options = { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+        return new Date(dateString).toLocaleDateString('en-US', options);
+    }
+</script>
+</body>
+</html>
+
